@@ -82,6 +82,7 @@ export default function ConfigScreen({ ctx }: Props) {
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [error, setError] = useState<string | null>(null);
+  const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
 
   const validateRegex = (pattern: string): boolean => {
     try {
@@ -540,46 +541,119 @@ export default function ConfigScreen({ ctx }: Props) {
               }, 0) !== 1 ? 'es' : ''})
             </h3>
             <div className={s.resultsList}>
-              {searchResults.map((result, index) => (
-                <div key={index} className={s.resultItem}>
-                  <div className={s.resultHeader}>
-                    <strong>{result.itemTypeName}</strong>
-                    <span className={s.recordInfo}>
-                      {result.itemTitle ? `${result.itemTitle} ` : ''}
-                      <span className={s.recordId}>({result.itemId})</span>
-                    </span>
-                    <span className={s.fieldName}>Field: {result.fieldApiKey}</span>
-                  </div>
-                  <div className={s.resultContent}>
+              {searchResults.map((result, index) => {
+                const resultKey = `${result.itemId}-${result.fieldApiKey}`;
+                const isExpanded = expandedItems.has(resultKey);
+                const totalMatches = result.localeMatches 
+                  ? Object.values(result.localeMatches).reduce((sum, matches) => sum + matches.length, 0)
+                  : (result.matches?.length || 0);
+                
+                return (
+                  <div key={index} className={s.resultItem}>
+                    <div 
+                      className={s.resultHeader} 
+                      onClick={() => {
+                        if (totalMatches > 1) {
+                          const newExpanded = new Set(expandedItems);
+                          if (isExpanded) {
+                            newExpanded.delete(resultKey);
+                          } else {
+                            newExpanded.add(resultKey);
+                          }
+                          setExpandedItems(newExpanded);
+                        }
+                      }}
+                      style={{ cursor: totalMatches > 1 ? 'pointer' : 'default' }}
+                    >
+                      <div className={s.headerLeft}>
+                        {totalMatches > 1 && (
+                          <span className={s.expandIcon}>
+                            {isExpanded ? '▼' : '▶'}
+                          </span>
+                        )}
+                        <strong>{result.itemTypeName}</strong>
+                        <span className={s.recordInfo}>
+                          {result.itemTitle ? `${result.itemTitle} ` : ''}
+                          <span className={s.recordId}>({result.itemId})</span>
+                        </span>
+                        <span className={s.fieldName}>Field: {result.fieldApiKey}</span>
+                      </div>
+                      {totalMatches > 1 && (
+                        <span className={s.matchCount}>
+                          {totalMatches} matches
+                        </span>
+                      )}
+                    </div>
+                    <div className={s.resultContent}>
                     {result.localeMatches ? (
                       // Localized field - show matches grouped by locale
-                      Object.entries(result.localeMatches).map(([locale, localeMatches]) => (
-                        localeMatches.map((match, matchIndex) => (
-                          <div key={`${locale}-${matchIndex}`} className={s.matchContextWrapper}>
-                            <div className={s.matchContext}>
-                              <HighlightedText 
-                                text={match.context} 
-                                searchPattern={isRegex ? new RegExp(searchInput, 'gi') : searchInput} 
-                              />
-                            </div>
-                            <span className={s.localeTag}>{locale.toUpperCase()}</span>
-                          </div>
-                        ))
-                      )).flat()
+                      (() => {
+                        const allMatches = Object.entries(result.localeMatches).flatMap(([locale, localeMatches]) => 
+                          localeMatches.map((match, matchIndex) => ({ locale, match, key: `${locale}-${matchIndex}` }))
+                        );
+                        const matchesToShow = isExpanded ? allMatches : allMatches.slice(0, 1);
+                        
+                        return (
+                          <>
+                            {matchesToShow.map(({ locale, match, key }) => (
+                              <div key={key} className={s.matchContextWrapper}>
+                                <div className={s.matchContext}>
+                                  <HighlightedText 
+                                    text={match.context} 
+                                    searchPattern={isRegex ? new RegExp(searchInput, 'gi') : searchInput} 
+                                  />
+                                </div>
+                                <span className={s.localeTag}>{locale.toUpperCase()}</span>
+                              </div>
+                            ))}
+                            {!isExpanded && allMatches.length > 1 && (
+                              <div className={s.peekMatch}>
+                                <div className={s.matchContextWrapper}>
+                                  <div className={s.matchContext}>
+                                    <HighlightedText 
+                                      text={allMatches[1].match.context} 
+                                      searchPattern={isRegex ? new RegExp(searchInput, 'gi') : searchInput} 
+                                    />
+                                  </div>
+                                  <span className={s.localeTag}>{allMatches[1].locale.toUpperCase()}</span>
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()
                     ) : (
                       // Non-localized field
-                      result.matches?.map((match, matchIndex) => (
-                        <div key={matchIndex} className={s.matchContext}>
-                          <HighlightedText 
-                            text={match.context} 
-                            searchPattern={isRegex ? new RegExp(searchInput, 'gi') : searchInput} 
-                          />
-                        </div>
-                      ))
+                      (() => {
+                        const matchesToShow = isExpanded ? result.matches : result.matches?.slice(0, 1);
+                        return (
+                          <>
+                            {matchesToShow?.map((match, matchIndex) => (
+                              <div key={matchIndex} className={s.matchContext}>
+                                <HighlightedText 
+                                  text={match.context} 
+                                  searchPattern={isRegex ? new RegExp(searchInput, 'gi') : searchInput} 
+                                />
+                              </div>
+                            ))}
+                            {!isExpanded && result.matches && result.matches.length > 1 && (
+                              <div className={s.peekMatch}>
+                                <div className={s.matchContext}>
+                                  <HighlightedText 
+                                    text={result.matches[1].context} 
+                                    searchPattern={isRegex ? new RegExp(searchInput, 'gi') : searchInput} 
+                                  />
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()
                     )}
                   </div>
                 </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}

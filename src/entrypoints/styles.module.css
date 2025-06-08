@@ -81,6 +81,8 @@
   border-radius: var(--border-radius-m);
   padding: var(--spacing-m);
   transition: box-shadow 0.2s ease;
+  position: relative;
+  overflow: hidden;
 }
 
 .resultItem:hover {
@@ -90,9 +92,39 @@
 .resultHeader {
   display: flex;
   align-items: center;
+  justify-content: space-between;
   gap: var(--spacing-m);
   margin-bottom: var(--spacing-s);
   flex-wrap: wrap;
+  transition: transform 0.1s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.resultHeader:active {
+  transform: scale(0.995);
+}
+
+.headerLeft {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-m);
+  flex-wrap: wrap;
+}
+
+.expandIcon {
+  font-size: var(--font-size-xs);
+  color: var(--light-body-color);
+  transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  display: inline-block;
+  width: 16px;
+}
+
+.matchCount {
+  font-size: var(--font-size-s);
+  color: var(--light-body-color);
+  background: var(--light-bg-color);
+  padding: 2px 8px;
+  border-radius: var(--border-radius-s);
+  font-weight: 500;
 }
 
 .resultHeader strong {
@@ -159,7 +191,53 @@
 
 .resultContent {
   margin-bottom: var(--spacing-m);
+  transition: max-height 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
 }
+
+.peekMatch {
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  margin-top: var(--spacing-s);
+  position: relative;
+}
+
+.peekMatch::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(to bottom, 
+    rgba(255, 255, 255, 0.2) 0%, 
+    rgba(255, 255, 255, 0.6) 30%,
+    rgba(255, 255, 255, 0.9) 70%,
+    rgba(255, 255, 255, 1) 100%
+  );
+  pointer-events: none;
+  z-index: 1;
+}
+
+.peekMatch .matchContextWrapper,
+.peekMatch .matchContext {
+  transform: translateY(10px);
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.resultItem:hover .peekMatch {
+  max-height: 100px;
+  opacity: 0.6;
+}
+
+.resultItem:hover .peekMatch .matchContextWrapper,
+.resultItem:hover .peekMatch .matchContext {
+  transform: translateY(0);
+}
+
+/* Remove all animations - they're causing the flash */
 
 .matchContext {
   font-size: var(--font-size-s);
