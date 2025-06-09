@@ -791,53 +791,49 @@ export default function ConfigScreen({ ctx }: Props) {
           </div>
         </div>
 
-        <form className={s.searchSection} onSubmit={(e) => {
-          e.preventDefault();
-          if (!isSearching && searchInput.trim()) {
-            handleSearch();
-          }
-        }}>
-          <div className={s.searchCard}>
-            <div className={s.searchIcon}>🔍</div>
-            <div className={s.searchContent}>
-              <div className={s.inputGroup}>
-                <TextField
-                  id="search-pattern"
-                  name="search-pattern"
-                  label="Search String"
-                  value={searchInput}
-                  onChange={setSearchInput}
-                  placeholder="Enter search string"
-                  hint="Search is case-insensitive and finds all occurrences"
-                />
-              </div>
+        <div className={s.cardsWrapper}>
+          <form className={s.searchSection} onSubmit={(e) => {
+            e.preventDefault();
+            if (!isSearching && searchInput.trim()) {
+              handleSearch();
+            }
+          }}>
+            <div className={s.searchCard}>
+              <div className={s.searchIcon}>🔍</div>
+              <div className={s.searchContent}>
+                <div className={s.inputGroup}>
+                  <TextField
+                    id="search-pattern"
+                    name="search-pattern"
+                    label="Search String"
+                    value={searchInput}
+                    onChange={setSearchInput}
+                    placeholder="Enter search string"
+                    hint="Search is case-insensitive and finds all occurrences"
+                  />
+                </div>
 
-              <div className={s.controls}>
-                <Button
-                  onClick={handleSearch}
-                  buttonType="primary"
-                  disabled={isSearching || !searchInput.trim()}
-                  leftIcon={!isSearching ? '🔎' : undefined}
-                >
-                  {isSearching ? <><Spinner size={20} /> Searching...</> : 'Search for Matches'}
-                </Button>
+                <div className={s.controls}>
+                  <Button
+                    onClick={handleSearch}
+                    buttonType="primary"
+                    buttonSize="l"
+                    disabled={isSearching || !searchInput.trim()}
+                    leftIcon={!isSearching ? '🔎' : undefined}
+                    fullWidth
+                  >
+                    {isSearching ? <><Spinner size={20} /> Searching...</> : 'Search for Matches'}
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
+          </form>
 
-          {error && (
-            <div className={s.error}>
-              {error}
-            </div>
-          )}
-        </form>
-
-        {searchResults.length > 0 && (
-          <div className={s.results}>
-            <div className={s.replaceSection}>
-              <div className={s.replaceCard}>
-                <div className={s.replaceIcon}>✏️</div>
-                <div className={s.replaceContent}>
+          <div className={s.replaceSection}>
+            <div className={s.replaceCard}>
+              <div className={s.replaceIcon}>✏️</div>
+              <div className={s.replaceContent}>
+                <div className={s.inputGroup}>
                   <TextField
                     id="replace-string"
                     name="replace-string"
@@ -847,50 +843,47 @@ export default function ConfigScreen({ ctx }: Props) {
                     placeholder="Enter replacement string"
                     hint="This will replace all occurrences of the search pattern"
                   />
-                  
-                  <div className={s.replaceActions}>
-                    <label className={s.checkboxPrimary}>
-                      <input
-                        type="checkbox"
-                        checked={replaceAll}
-                        onChange={(e) => {
-                          if (!e.target.checked) {
-                            setReplaceAllManuallyUnchecked(true);
-                          }
-                          setReplaceAll(e.target.checked);
-                        }}
-                        disabled={replaceProgress.inProgress}
-                      />
-                      <span>Replace All</span>
-                    </label>
-                    
-                    <Button
-                      onClick={handleReplace}
-                      buttonType="negative"
-                      disabled={replaceProgress.inProgress || (!replaceAll && selectedItems.size === 0)}
-                      leftIcon={!replaceProgress.inProgress ? '⚡' : undefined}
-                    >
-                      {replaceProgress.inProgress ? (
-                        <>
-                          <Spinner size={20} />
-                          Replacing... ({replaceProgress.completed}/{replaceProgress.total})
-                        </>
-                      ) : (
-                        `Replace ${replaceAll ? 'All' : `Selected (${selectedItems.size})`}`
-                      )}
-                    </Button>
-                  </div>
+                </div>
+                
+                <div className={s.replaceActions}>
+                  <Button
+                    onClick={handleReplace}
+                    buttonType={searchResults.length === 0 ? "muted" : "primary"}
+                    buttonSize="l"
+                    disabled={replaceProgress.inProgress || searchResults.length === 0 || selectedItems.size === 0}
+                    fullWidth
+                  >
+                    {replaceProgress.inProgress ? (
+                      <>
+                        <Spinner size={20} />
+                        Replacing... ({replaceProgress.completed}/{replaceProgress.total})
+                      </>
+                    ) : (
+                      searchResults.length === 0 ? 'Replace Selected (0)' : `Replace Selected (${selectedItems.size})`
+                    )}
+                  </Button>
                 </div>
               </div>
-              
-              {replaceProgress.total > 0 && !replaceProgress.inProgress && (
-                <div className={s.replaceStatus}>
-                  <p>
-                    Replacement complete: {replaceProgress.completed} successful, {replaceProgress.failed} failed
-                  </p>
-                </div>
-              )}
             </div>
+          </div>
+        </div>
+
+        {error && (
+          <div className={s.error}>
+            {error}
+          </div>
+        )}
+
+        {replaceProgress.total > 0 && !replaceProgress.inProgress && (
+          <div className={s.replaceStatus}>
+            <p>
+              Replacement complete: {replaceProgress.completed} successful, {replaceProgress.failed} failed
+            </p>
+          </div>
+        )}
+
+        {searchResults.length > 0 && (
+          <div className={s.results}>
             
             <h3>
               Search Results ({searchResults.length} record{searchResults.length !== 1 ? 's' : ''}, {searchResults.reduce((sum, r) => {
@@ -909,6 +902,31 @@ export default function ConfigScreen({ ctx }: Props) {
                 }, 0);
               }, 0) !== 1 ? 'es' : ''})
             </h3>
+            
+            <div className={s.selectAllWrapper}>
+              <Button
+                onClick={() => {
+                  if (searchResults.length > 0) {
+                    if (selectedItems.size === searchResults.length) {
+                      // Deselect all
+                      setSelectedItems(new Set());
+                      setReplaceAll(false);
+                    } else {
+                      // Select all
+                      const allIds = new Set(searchResults.map(r => r.itemId));
+                      setSelectedItems(allIds);
+                      setReplaceAll(true);
+                    }
+                  }
+                }}
+                buttonType="muted"
+                buttonSize="l"
+                disabled={replaceProgress.inProgress}
+                fullWidth
+              >
+                {selectedItems.size === searchResults.length && searchResults.length > 0 ? 'Deselect All' : 'Select All'}
+              </Button>
+            </div>
             
             <div className={s.resultsList}>
               {searchResults.map((result, index) => {
