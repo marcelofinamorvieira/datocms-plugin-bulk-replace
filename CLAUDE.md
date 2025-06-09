@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a DatoCMS plugin that allows users to search for strings or regex patterns across all content in their DatoCMS project. The plugin provides a configuration screen UI where users can enter search patterns and view matching records.
+This is a DatoCMS plugin that allows users to search for strings across all content in their DatoCMS project. The plugin provides a configuration screen UI where users can enter search strings and view matching records.
 
 ## Commands
 
@@ -42,7 +42,7 @@ The plugin is configured in `package.json` under the `datoCmsPlugin` field:
 
 ### Search Implementation
 The ConfigScreen component implements:
-1. String/regex pattern input with validation
+1. String input with validation
 2. Search across all models and records using CMA client
 3. Pagination handling for large datasets (100 records per page)
 4. Results display with links to edit records in DatoCMS

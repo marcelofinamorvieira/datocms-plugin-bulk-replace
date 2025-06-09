@@ -1,17 +1,19 @@
 # DatoCMS Plugin Bulk Replace
 
-Find and replace strings (or regexes) across your DatoCMS project
+Find and replace strings across your DatoCMS project
 
 ## Features
 
-- Search for exact strings or regex patterns across all your DatoCMS records
+- Search for strings across all your DatoCMS records
+- **Replace functionality** - Replace matched strings with new values
+- Selective replacement - Choose specific items or replace all at once
 - View all matches organized by model and field with context snippets
 - Modern highlight effect on matched terms
 - Shows 4 words before and after each match for better context
 - Displays locale information for matches in localized fields
-- Direct links to edit matching records
 - Support for searching in all field types including JSON and structured text
-- Real-time search with progress indication
+- Real-time search and replace with progress indication
+- Visual feedback for replaced items
 
 ## Installation
 
@@ -24,23 +26,36 @@ To install this plugin:
 
 ## Usage
 
+### Searching
 1. Open the plugin from the Plugins menu in your DatoCMS dashboard
-2. Enter a search string or regex pattern in the input field
-3. Toggle "Use Regular Expression" if you want to use regex search
-4. Click "Search for Matches" to find all occurrences across your content
-5. Review the results and click "Edit Record" to open any matching record
+2. Enter a search string in the input field
+3. Click "Search for Matches" to find all occurrences across your content
+
+### Replacing
+1. After searching, enter the replacement string in the "Replace with" field
+2. Choose your replacement method:
+   - Select individual items using checkboxes for selective replacement
+   - Check "Replace All" to replace in all found items
+3. Click the "Replace" button to perform the replacement
+4. Confirm the action in the dialog
+5. Monitor the progress and view results
 
 ### Search Examples
 
-**Exact String Search:**
 - Search for: `example@email.com`
-- Finds all exact occurrences of this email address
+- Finds all occurrences of this email address
+- Search for: `old company name`
+- Finds all occurrences of this text
 
-**Regular Expression Search:**
-- Search for: `\d{3}-\d{3}-\d{4}`
-- Finds all phone numbers in the format XXX-XXX-XXXX
-- Search for: `https?://[^\s]+`
-- Finds all HTTP/HTTPS URLs
+### Replace Examples
+
+- Search: `example@email.com`
+- Replace with: `contact@company.com`
+- Replaces all occurrences of the old email with the new one
+
+- Search: `old company name`
+- Replace with: `new company name`
+- Updates all references to the company name
 
 ## Permissions
 
