@@ -904,7 +904,7 @@ export default function ConfigScreen({ ctx }: Props) {
             </h3>
             
             <div className={s.selectAllWrapper}>
-              <Button
+              <button
                 onClick={() => {
                   if (searchResults.length > 0) {
                     if (selectedItems.size === searchResults.length) {
@@ -919,13 +919,13 @@ export default function ConfigScreen({ ctx }: Props) {
                     }
                   }
                 }}
-                buttonType="muted"
-                buttonSize="l"
+                className={`${s.selectAllButton} ${selectedItems.size === searchResults.length && searchResults.length > 0 ? s.allSelected : ''}`}
                 disabled={replaceProgress.inProgress}
-                fullWidth
               >
+                <span className={`${s.selectAllIcon} ${selectedItems.size === searchResults.length && searchResults.length > 0 ? s.checked : ''}`}>
+                </span>
                 {selectedItems.size === searchResults.length && searchResults.length > 0 ? 'Deselect All' : 'Select All'}
-              </Button>
+              </button>
             </div>
             
             <div className={s.resultsList}>
@@ -973,7 +973,6 @@ export default function ConfigScreen({ ctx }: Props) {
                             disabled={replaceProgress.inProgress || result.replaced}
                             aria-label={selectedItems.has(result.itemId) ? 'Deselect item' : 'Select item'}
                           >
-                            {selectedItems.has(result.itemId) ? '✓' : ''}
                           </button>
                           {(totalMatches > 1 || result.fields.length > 1) && (
                             <button
